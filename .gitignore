@@ -1,0 +1,48 @@
+# Private, stays on the owner's PC only
+/docs/private/
+
+# Secrets: only .env.example is committed
+.env*
+!.env.example
+
+# Dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+
+# Build output
+/build
+*.tsbuildinfo
+
+# Tests
+/coverage
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# Service worker build output (M4)
+/public/sw.js
+/public/sw.js.map
+/public/swe-worker-*.js
+
+# Logs and OS files
+npm-debug.log*
+*.log
+.DS_Store
+Thumbs.db
+*.pem
+
+# Vercel
+.vercel
+
+# Claude Code local-only files
+.claude/settings.local.json
+CLAUDE.local.md
+.superpowers/

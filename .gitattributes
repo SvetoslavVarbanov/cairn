@@ -1,0 +1,8 @@
+# Same line endings on Windows and Linux (CI)
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary
+*.pdf binary
+*.woff2 binary
