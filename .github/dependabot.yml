@@ -1,0 +1,35 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+    ignore:
+      # ADR 2: stay on ESLint 9 until eslint-config-next and its plugins support ESLint 10.
+      - dependency-name: eslint
+        update-types: ["version-update:semver-major"]
+      # ADR 3: stay on TypeScript 5 until Next.js supports TypeScript 7.
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
+      # Node types follow the lowest supported runtime (Node 24, see ADR 3).
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: "ci(deps)"
