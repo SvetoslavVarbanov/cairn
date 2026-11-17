@@ -22,6 +22,7 @@ next-env.d.ts
 
 # Tests
 /coverage
+/tests/.hook-scratch/
 /test-results/
 /playwright-report/
 /blob-report/

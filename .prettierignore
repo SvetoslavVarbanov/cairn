@@ -1,0 +1,20 @@
+# Private files stay untouched
+docs/private/
+
+# The specification is kept word for word
+docs/SPEC.md
+
+# Written and rewritten by `next dev`
+AGENTS.md
+
+# Generated
+.next/
+out/
+build/
+coverage/
+playwright-report/
+test-results/
+node_modules/
+package-lock.json
+next-env.d.ts
+public/sw.js
