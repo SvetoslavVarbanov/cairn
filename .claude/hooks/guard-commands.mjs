@@ -212,15 +212,23 @@ function checkNestedShell(shell, args, ctx) {
     return script === undefined ? null : checkScript(script, ctx);
   }
   if (POWERSHELLS.has(shell)) {
+    // Parameters may start with -, -- or /, as in -Command or /Command.
     if (
       args.some((a) =>
-        /^-(e|ec|en(c(o(d(e(d(c(o(m(m(a(nd?)?)?)?)?)?)?)?)?)?)?)?)$/i.test(a),
+        /^(-|--|\/)(e|ec|en(c(o(d(e(d(c(o(m(m(a(nd?)?)?)?)?)?)?)?)?)?)?)?)$/i.test(
+          a,
+        ),
       )
     ) {
       return REASONS.encoded;
     }
-    const at = args.findIndex((a) => /^-c(o(m(m(a(nd?)?)?)?)?)?$/i.test(a));
-    return at === -1 ? null : checkScript(args.slice(at + 1).join(" "), ctx);
+    const at = args.findIndex((a) =>
+      /^(-|--|\/)c(o(m(m(a(nd?)?)?)?)?)?$/i.test(a),
+    );
+    // Without -Command, PowerShell runs its first plain argument as the
+    // script, so check every argument.
+    const script = at === -1 ? args : args.slice(at + 1);
+    return checkScript(script.join(" "), ctx);
   }
   // cmd /c ... and cmd /k ...
   const at = args.findIndex((a) => /^\/[ck]$/i.test(a));

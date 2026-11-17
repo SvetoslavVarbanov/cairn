@@ -73,6 +73,9 @@ describe("deleting folders with everything in them", () => {
     `powershell -Command "Remove-Item -Recurse -Force x"`,
     "pwsh -c Remove-Item -Recurse -Force x",
     "powershell.exe -NoProfile -Command Remove-Item -Recurse -Force x",
+    `powershell "Remove-Item -Recurse -Force x"`,
+    `pwsh -NoProfile "Remove-Item old-dir -Recurse"`,
+    `powershell /Command "Remove-Item -Recurse x"`,
     `"C:\\Program Files\\Git\\bin\\bash.exe" -c "rm -rf x"`,
     // Without a force flag: Claude's shell has no terminal, so nothing asks first.
     "rm -r old-dir",

@@ -79,7 +79,13 @@ export function baseName(filePath) {
  * @param {string} filePath
  */
 export function isSecretEnvFile(filePath) {
-  const name = baseName(filePath).toLowerCase();
+  // Windows reads ".env:x" (a stream of .env), "C:.env" (drive-relative) and
+  // ".env." or ".env " (trailing dots and spaces dropped) as the same file.
+  const name = baseName(filePath)
+    .toLowerCase()
+    .replace(/^[a-z]:/, "")
+    .replace(/:.*$/, "")
+    .replace(/[. ]+$/, "");
   return /^\.env(\..+)?$/.test(name) && name !== ".env.example";
 }
 
@@ -91,7 +97,9 @@ export function isSecretEnvFile(filePath) {
  */
 export function globCouldMatchEnvFile(pattern) {
   const name = baseName(pattern).toLowerCase();
-  const wildcard = name.search(/[*?[]/);
+  // A brace choice that starts with a dot, as in {.env,a}, can pick .env.
+  if (/[{,]\./.test(name)) return true;
+  const wildcard = name.search(/[*?[{]/);
   if (wildcard === -1) return false;
   const before = name.slice(0, wildcard);
   return (

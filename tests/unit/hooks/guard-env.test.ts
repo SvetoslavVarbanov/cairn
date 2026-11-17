@@ -19,6 +19,11 @@ describe("isSecretEnvFile", () => {
     ".env.development.local",
     "C:\\Users\\me\\Cairn\\.env.local",
     "/home/me/cairn/.ENV",
+    // Windows ignores trailing dots and spaces and allows ":stream" names.
+    ".env.local.",
+    ".env. ",
+    "C:\\x\\.env:secret",
+    ".ENV::$DATA",
   ])("treats %s as secret", (path) => {
     expect(isSecretEnvFile(path)).toBe(true);
   });
@@ -131,19 +136,30 @@ describe("lib helpers", () => {
     expect(isInsideProject("D:\\a\\b.ts", "C:\\a")).toBe(false);
   });
 
-  it.each([".env*", ".e[n]v.local", ".en?", ".*", "config/.env.*"])(
-    "treats the pattern %s as one that could pick a .env file",
-    (pattern) => {
-      expect(globCouldMatchEnvFile(pattern)).toBe(true);
-    },
-  );
+  it.each([
+    ".env*",
+    ".e[n]v.local",
+    ".en?",
+    ".*",
+    "config/.env.*",
+    ".{env,x}",
+    "{.env,a}",
+    "x{a,.env.local}",
+  ])("treats the pattern %s as one that could pick a .env file", (pattern) => {
+    expect(globCouldMatchEnvFile(pattern)).toBe(true);
+  });
 
-  it.each(["*.ts", ".eslintcache*", "src/**", ".env.example", "env*"])(
-    "treats the pattern %s as safe",
-    (pattern) => {
-      expect(globCouldMatchEnvFile(pattern)).toBe(false);
-    },
-  );
+  it.each([
+    "*.ts",
+    ".eslintcache*",
+    "src/**",
+    ".env.example",
+    "env*",
+    "*.{ts,tsx}",
+    "src/{a,b}.ts",
+  ])("treats the pattern %s as safe", (pattern) => {
+    expect(globCouldMatchEnvFile(pattern)).toBe(false);
+  });
 
   it("finds the last path segment on Windows and POSIX", () => {
     expect(baseName("C:\\a\\b.txt")).toBe("b.txt");

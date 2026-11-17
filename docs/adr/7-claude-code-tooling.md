@@ -33,6 +33,7 @@ The owner does not review code, so the automatic checks have to be real. Third-p
   - Before reading, searching or editing files: block `.env` files in any folder, except `.env.example`. `permissions.deny` rules back this up for the usual names.
   - The two guards fail safe: if a guard crashes or cannot read its input, the action is blocked. The helper hooks (formatting and the end-of-turn check) never block on their own errors.
   - Recursive deletes are blocked even without a force flag because Claude's shell has no terminal, so `rm -r` never asks before deleting.
+  - Known limits, accepted: the guards catch honest mistakes, not deliberate disguise. They do not undo shell escapes inside a command name (such as `r\m`), and they do not look inside code that starts other programs (such as `node -e` calling `child_process`). GitHub's branch protection and the rule to ask the owner first remain the real controls.
   - When a turn ends: typecheck and lint on changed code, reported to the owner. It only reports, so it cannot loop.
 - **Reviewer agents** in `.claude/agents/`: code, security, accessibility and UX copy. They are read-only.
 - **Skills** in `.claude/skills/`: `verify` (runs before each commit, a Claude Code 2.1.286+ behaviour), `new-slice` and `release`.
