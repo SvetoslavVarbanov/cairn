@@ -134,15 +134,21 @@ describe("format-on-edit.mjs", () => {
   });
 
   it("leaves files outside the project alone", () => {
-    const file = join(tmpdir(), `cairn-format-${process.pid}.json`);
-    writeFileSync(file, '{"a":1,   "b":[1,2]}');
-    const result = runHook("format-on-edit.mjs", {
-      tool_name: "Write",
-      tool_input: { file_path: file },
-    });
-    expect(result.code).toBe(0);
-    expect(readFileSync(file, "utf8")).toBe('{"a":1,   "b":[1,2]}');
-    rmSync(file);
+    // A private, randomly named folder, so no other program can plant a
+    // file or link at a predictable path in the shared temp folder.
+    const outside = mkdtempSync(join(tmpdir(), "cairn-outside-"));
+    try {
+      const file = join(outside, "format.json");
+      writeFileSync(file, '{"a":1,   "b":[1,2]}');
+      const result = runHook("format-on-edit.mjs", {
+        tool_name: "Write",
+        tool_input: { file_path: file },
+      });
+      expect(result.code).toBe(0);
+      expect(readFileSync(file, "utf8")).toBe('{"a":1,   "b":[1,2]}');
+    } finally {
+      rmSync(outside, { recursive: true, force: true });
+    }
   });
 
   it("reports lint problems it cannot fix back to Claude", () => {

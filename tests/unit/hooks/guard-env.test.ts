@@ -144,7 +144,10 @@ describe("lib helpers", () => {
     "config/.env.*",
     ".{env,x}",
     "{.env,a}",
-    "x{a,.env.local}",
+    "{x,}.env",
+    ".{env,x}.local",
+    // An unreadable set (z before a) is treated as risky.
+    ".[z-a]",
   ])("treats the pattern %s as one that could pick a .env file", (pattern) => {
     expect(globCouldMatchEnvFile(pattern)).toBe(true);
   });
@@ -157,6 +160,14 @@ describe("lib helpers", () => {
     "env*",
     "*.{ts,tsx}",
     "src/{a,b}.ts",
+    // Spells "xa" or "x.env.local": neither name starts with .env.
+    "x{a,.env.local}",
+    // Bash's * skips names that start with a dot.
+    "*",
+    // jq expressions, not file names.
+    ".[0].name",
+    ".[] | {number, path: .location.path}",
+    "{name, title: .output.title}",
   ])("treats the pattern %s as safe", (pattern) => {
     expect(globCouldMatchEnvFile(pattern)).toBe(false);
   });

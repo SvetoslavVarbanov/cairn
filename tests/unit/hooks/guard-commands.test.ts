@@ -114,6 +114,10 @@ describe("deleting folders with everything in them", () => {
     `node -e "console.log({ recursive: true })"`,
     "npm uninstall rimraf",
     "npm ls rimraf",
+    `gh api repos/x/y/alerts --jq '.[] | {number, path: .most_recent_instance.location.path}'`,
+    "gh pr view 1 --json checks --jq .[0].name",
+    "git add *",
+    "ls *.ts",
     `echo "rm -rf is blocked"`,
     `git commit -m "block rm -rf in hooks"`,
   ])("allows %s", (command) => {
@@ -282,6 +286,7 @@ describe(".env files in the shell", () => {
     "cat .e[n]v.local",
     "cat .en?.local",
     "cat .*",
+    "cat {x,}.env",
     `Get-Content "C:\\Users\\Some User\\Desktop\\Projects\\Cairn\\.env.local"`,
     "node --env-file=.env.local server.mjs",
     "Get-Content -Path:.env",

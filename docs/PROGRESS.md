@@ -4,7 +4,13 @@ Where Cairn stands, so any session can pick up without the owner repeating anyth
 
 ## Now
 
-**M0 Foundations:** built on branch `chore/m0-foundations`, waiting for reviews, CI and merge.
+**M0 Foundations:** done (2026-11-17), merged through pull request 1. Waiting for the owner before M1.
+
+Open owner decisions:
+
+- turn on GitHub private vulnerability reporting and Dependabot security updates (both off; `SECURITY.md` has a fallback);
+- whether the persona hints left in the public spec are fine (see [ADR 6](adr/6-public-repo-private-details.md));
+- type `/run-skill-generator` once.
 
 ## Done
 

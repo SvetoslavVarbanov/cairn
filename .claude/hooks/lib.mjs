@@ -89,23 +89,71 @@ export function isSecretEnvFile(filePath) {
   return /^\.env(\..+)?$/.test(name) && name !== ".env.example";
 }
 
+// Typical secret file names a wildcard pattern is tested against.
+const ENV_SAMPLES = [
+  ".env",
+  ".env.local",
+  ".env.development",
+  ".env.development.local",
+  ".env.production",
+  ".env.production.local",
+  ".env.test",
+  ".env.test.local",
+  ".env.staging",
+  ".env.x",
+];
+
+/**
+ * Turns a shell wildcard pattern (`*`, `?`, `[abc]`, `{a,b}`) into the body of
+ * a regular expression. Characters without a wildcard meaning match
+ * themselves, so jq expressions such as `.[] | {a}` match nothing useful.
+ * @param {string} glob
+ * @returns {string}
+ */
+function globToRegExpSource(glob) {
+  let out = "";
+  for (let i = 0; i < glob.length; i++) {
+    const ch = glob.charAt(i);
+    if (ch === "*") {
+      out += "[^/]*";
+    } else if (ch === "?") {
+      out += "[^/]";
+    } else if (ch === "[" && glob.indexOf("]", i + 2) !== -1) {
+      // A ] straight after [ belongs to the set, as in shells.
+      const close = glob.indexOf("]", i + 2);
+      const body = glob.slice(i + 1, close).replace(/^!/, "^");
+      out += `[${body.replace(/[\\\]]/g, "\\$&")}]`;
+      i = close;
+    } else if (ch === "{" && glob.indexOf("}", i) !== -1) {
+      const close = glob.indexOf("}", i);
+      const choices = glob.slice(i + 1, close).split(",");
+      out += `(?:${choices.map(globToRegExpSource).join("|")})`;
+      i = close;
+    } else {
+      out += ch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+  }
+  return out;
+}
+
 /**
  * True for a wildcard pattern that could pick a `.env` file, such as `.env*`,
- * `.e[n]v.local`, `.en?` or `.*`. The text before the first wildcard must be
- * the start of `.env`, or begin with `.env`.
+ * `.e[n]v.local`, `.en?`, `.*` or `{x,}.env`. Patterns that start with `*` or
+ * `?` are safe: shells never let those match a name starting with a dot.
  * @param {string} pattern
  */
 export function globCouldMatchEnvFile(pattern) {
   const name = baseName(pattern).toLowerCase();
-  // A brace choice that starts with a dot, as in {.env,a}, can pick .env.
-  if (/[{,]\./.test(name)) return true;
   const wildcard = name.search(/[*?[{]/);
-  if (wildcard === -1) return false;
-  const before = name.slice(0, wildcard);
-  return (
-    before.startsWith(".") &&
-    (".env".startsWith(before) || before.startsWith(".env"))
-  );
+  if (wildcard === -1 || /^[*?]/.test(name)) return false;
+  // Any name that starts with .env counts, e.g. .env.st* for .env.staging.
+  if (name.slice(0, wildcard).startsWith(".env")) return true;
+  try {
+    const matcher = new RegExp(`^${globToRegExpSource(name)}$`);
+    return ENV_SAMPLES.some((sample) => matcher.test(sample));
+  } catch {
+    return true; // A pattern that cannot be read is treated as risky.
+  }
 }
 
 /**
